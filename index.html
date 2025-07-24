@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Flashcard App</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h1>Flashcard App</h1>
+        <section id="create-deck">
+            <input id="deck-name" placeholder="Deck Name">
+            <button onclick="createDeck()">Create Deck</button>
+        </section>
+
+        <section id="deck-list"></section>
+
+        <section id="card-editor" style="display: none">
+            <h2 id="deck-title"></h2>
+            <input id="front-text" placeholder="Front (Question)">
+            <input id="back-text" placeholder="Back (Answer)">
+            <button onclick="addCard()">Add Card</button>
+            <button onclick="startStudy()">Study Deck</button>
+            <div id="card-list"></div>
+        </section>
+
+        <section id="study-mode" style="display: none">
+            <h2>Study Mode</h2>
+            <div id="study-card" onclick="flipCard()"></div>
+            <button onclick="nextCard()">Next</button>
+            <button onclick="exitStudy()">Exit</button>
+        </section>
+
+        <script src="script.js"></script>
+    </body>
+</html>
