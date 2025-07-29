@@ -1,62 +1,78 @@
-let decks = JSON.parse(localStorage.getItem('flashcardDecks')) || {};
 let currentDeck = null;
 let studyIndex = 0;
 let isFlipped = false;
+let decks = {};
 
-function saveDecks() {
-    localStorage.setItem('flashcardDecks', JSON.stringify(decks));
+console.log('script.js loaded');
+
+async function loadCards(deckName) {
+    const res = await fetch(`https://script.google.com/macros/s/AKfycbxG_bPRCatkgyApQJEt7AclixScDIH1Dbirhj4MM9rSYqUBon0a7O-NgJaciGdMKWNH/exec?deck=${encodeURIComponent(deckName)}`);
+    const cards = await res.json();
+    renderCardList(cards);
 }
 
-function createDeck() {
+async function createDeck() {
+    console.log('create deck clicked');
     const nameInput = document.getElementById('deck-name');
     const name = nameInput.value.trim();
-    if (!name || decks[name]) return alert ('Deck name is invalid or already exists');
+    if (!name) return alert('Deck name is required');
 
-    decks[name] = [];
-    saveDecks();
+    const url = `https://script.google.com/macros/s/AKfycbxG_bPRCatkgyApQJEt7AclixScDIH1Dbirhj4MM9rSYqUBon0a7O-NgJaciGdMKWNH/exec?action=addCard&deck=${encodeURIComponent(name)}&front=Placeholder&back=Placeholder`;
+    await fetch(url)
+
     nameInput.value = '';
-    renderDeckList();
+    await renderDeckList();
 }
 
-function renderDeckList() {
+async function renderDeckList() {
+    const res = await fetch('https://script.google.com/macros/s/AKfycbxG_bPRCatkgyApQJEt7AclixScDIH1Dbirhj4MM9rSYqUBon0a7O-NgJaciGdMKWNH/exec');
+    const decks = await res.json();
+
     const list = document.getElementById('deck-list');
     list.innerHTML = '<h2>Your Decks:</h2>';
-    for (const name in decks) {
+
+    decks.forEach(deckObj => {
+        const deckName = deckObj.deck || deckObj;
         const btn = document.createElement('button');
-        btn.textContent = name;
-        btn.onclick = () => openDeck(name);
+        btn.textContent = deckName;
+        btn.onclick = () => openDeck(deckName);
         list.appendChild(btn);
-    }
+    });
 }
 
-function openDeck(name) {
+async function openDeck(name) {
     currentDeck = name;
     document.getElementById('deck-title').textContent = name;
     document.getElementById('card-editor').style.display = 'block';
     document.getElementById('study-mode').style.display = 'none';
-    renderCardList();
+    await loadCards(name);
 }
 
-function addCard() {
+async function addCard() {
+    console.log('add card clicked')
     const front = document.getElementById('front-text').value.trim();
     const back = document.getElementById('back-text').value.trim();
     if (!front || !back) return alert('Both sides of the card are required.');
 
-    decks[currentDeck].push({ front, back });
-    saveDecks;
+
+    const url = `https://script.google.com/macros/s/AKfycbxG_bPRCatkgyApQJEt7AclixScDIH1Dbirhj4MM9rSYqUBon0a7O-NgJaciGdMKWNH/exec?action=addCard&deck=${encodeURIComponent(currentDeck)}&front=${encodeURIComponent(front)}&back=${encodeURIComponent(back)}`;
+    await fetch(url);
+
     document.getElementById('front-text').value = '';
     document.getElementById('back-text').value = '';
-    renderCardList();
+    await loadCards(currentDeck);
 }
 
-function renderCardList() {
+function renderCardList(cards) {
     const list = document.getElementById('card-list');
     list.innerHTML = '<h3>Cards:</h3>';
-    decks[currentDeck].forEach((card, i) => {
-        const div = document.getElement('div');
+    cards.forEach((card, i) => {
+        const div = document.createElement('div');
         div.textContent = `${i + 1}. ${card.front} -> ${card.back}`;
         list.appendChild(div);
     });
+
+    decks[currentDeck] = cards;
 }
 
 function startStudy() {
